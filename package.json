@@ -9,17 +9,68 @@
   "categories": [
     "Programming Languages"
   ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:fasmg"
+  ],
   "contributes": {
-    "languages": [{
-      "id": "fasmg",
-      "aliases": ["Fasmg Assembler", "fasmg"],
-      "extensions": [".asm",".inc"],
-      "configuration": "./language-configuration.json"
-    }],
-    "grammars": [{
-      "language": "fasmg",
-      "scopeName": "source.fasmg",
-      "path": "./syntaxes/fasmg.tmLanguage.json"
-    }]
+    "languages": [
+      {
+        "id": "fasmg",
+        "aliases": [
+          "Fasmg Assembler",
+          "fasmg"
+        ],
+        "extensions": [
+          ".asm",
+          ".inc"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "fasmg",
+        "scopeName": "source.fasmg",
+        "path": "./syntaxes/fasmg.tmLanguage.json"
+      }
+    ],
+    "semanticTokenTypes": [
+      {
+        "id": "label",
+        "superType": "variable",
+        "description": "Labels defined in fasmg / fasm2 source"
+      },
+      {
+        "id": "constant",
+        "superType": "variable",
+        "description": "Constants / EQU / DEFINE symbols in fasmg / fasm2"
+      }
+    ],
+    "semanticTokenScopes": [
+      {
+        "language": "fasmg",
+        "scopes": {
+          "label": [
+            "entity.name.label.fasmg"
+          ],
+          "constant": [
+            "variable.other.constant.fasmg"
+          ]
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "echo \"no\""
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.106.1",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "vsce": "^2.0.0"
   }
 }

@@ -100,7 +100,7 @@
       "patterns": [
         {
           "name": "variable.language.register.fasmg",
-          "match": "\\b(?i:rax|rbx|rcx|rdx|rsi|rdi|rsp|rbp|eax|ebx|ecx|edx|esi|edi|esp|ebp|ax|bx|cx|dx|si|di|sp|bp|al|ah|bl|bh|cl|ch|dl|dh|cs|ds|es|fs|gs|ss)\\b"
+          "match": "\\b(?i:rax|rbx|rcx|rdx|rsi|rdi|rsp|rbp|r(?:1[0-5]|[8-9])[dwb]?|eax|ebx|ecx|edx|esi|edi|esp|ebp|eip|ax|bx|cx|dx|si|di|sp|bp|ip|al|ah|bl|bh|cl|ch|dl|dh|spl|bpl|sil|dil|rip|rflags|eflags|cs|ds|es|fs|gs|ss|cr[0-9]+|dr[0-9]+|tr3|tr4|tr5|tr6|tr7|tr|ldtr|gdtr|idtr|xcr[0-9]+|st(?:\\([0-7]\\)|[0-7]?))\\b"
         }
       ]
     },
@@ -231,6 +231,10 @@
               "name": "keyword.control.include.fasmg"
             }
           }
+        },
+        {
+          "name": "keyword.control.fasmg",
+          "match": "\\b(?i:byte|word|dword|qword)\\b"
         },
         {
           "name": "keyword.control.fasmg",
