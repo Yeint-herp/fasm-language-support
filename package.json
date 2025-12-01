@@ -1,0 +1,25 @@
+{
+  "name": "fasmg-language-support",
+  "displayName": "Fasmg language support",
+  "description": "Syntax highlithing support for fasmg & fasm2.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.106.1"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "fasmg",
+      "aliases": ["Fasmg Assembler", "fasmg"],
+      "extensions": [".asm",".inc"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "fasmg",
+      "scopeName": "source.fasmg",
+      "path": "./syntaxes/fasmg.tmLanguage.json"
+    }]
+  }
+}

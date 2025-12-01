@@ -1,0 +1,307 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Fasmg Assembler",
+  "scopeName": "source.fasmg",
+  "patterns": [
+    {
+      "include": "#calm-block"
+    },
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#builtins"
+    },
+    {
+      "include": "#labels"
+    },
+    {
+      "include": "#definitions"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#registers"
+    },
+    {
+      "include": "#instructions"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#directives"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.semicolon.fasmg",
+          "match": ";.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.fasmg",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.fasmg",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.fasmg",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.fasmg",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "builtins": {
+      "patterns": [
+        {
+          "name": "constant.language.address.fasmg",
+          "match": "(\\$\\$|\\$@|\\$%%|\\$%|\\$(?![0-9A-Fa-f]))"
+        },
+        {
+          "name": "constant.language.sourceinfo.fasmg",
+          "match": "\\b(__time__|%t|__file__|__line__|__source__)\\b"
+        },
+        {
+          "name": "storage.type.size.fasmg",
+          "match": "\\b(?i:byte\\?|word\\?|dword\\?|fword\\?|pword\\?|qword\\?|tbyte\\?|tword\\?|dqword\\?|xword\\?|qqword\\?|yword\\?|dqqword\\?|zword\\?)\\b"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.fasmg",
+          "match": "\\b(0x[0-9A-Fa-f]+|\\$[0-9A-Fa-f]+|[0-9][0-9A-Fa-f]*[hH]|[01]+[bB]|[0-7]+[oOqQ]|[0-9]+[dD]?)\\b"
+        }
+      ]
+    },
+    "registers": {
+      "patterns": [
+        {
+          "name": "variable.language.register.fasmg",
+          "match": "\\b(?i:rax|rbx|rcx|rdx|rsi|rdi|rsp|rbp|eax|ebx|ecx|edx|esi|edi|esp|ebp|ax|bx|cx|dx|si|di|sp|bp|al|ah|bl|bh|cl|ch|dl|dh|cs|ds|es|fs|gs|ss)\\b"
+        }
+      ]
+    },
+    "instructions": {
+      "patterns": [
+        {
+          "name": "meta.instruction.data-labeled.fasmg",
+          "match": "^\\s*([.?A-Za-z_$][A-Za-z0-9_.#$?]*)\\s+(?i:(db|dw|dd|dq|dt|dp|ddq|dqq|ddqq|rb|rw|rd|rq|rt|rp|rdq|rqq|rdqq))\\b",
+          "captures": {
+            "1": {
+              "name": "entity.name.label.fasmg"
+            },
+            "2": {
+              "name": "storage.type.data.fasmg"
+            }
+          }
+        },
+        {
+          "name": "meta.instruction.fasmg",
+          "match": "^\\s*(?:(?:[.?A-Za-z_$][A-Za-z0-9_.#$?]*)(?::)\\s*)?(?i:(db|dw|dd|dq|dt|dp|ddq|dqq|ddqq|rb|rw|rd|rq|rt|rp|rdq|rqq|rdqq|syscall|mov|movzx|add|neg|sub|mul|div|jmp|je|jz|jne|jnz|jg|jl|jb|ja|jae|jbe|jna|jnb|js|jns|jnp|jp|jc|jnc|pushf|popf|pusha|popa|pushfd|popfd|pushaq|popaq|pushfq|popfq|scasw|push|pop|call|ret|retf|retn|iret|cmp|and|or|xor|not|shl|shr|rol|rol|das|sbb|inc|dec|lea|cpuid|xgetbv|test|stosb|stosw|stosd|lodsb|lodsw|lodsd|scasb|scasw|scasd|xchg|int|rep|repe|repz|repnz|repne|cli|sti|cld|std))\\b",
+          "captures": {
+            "1": {
+              "name": "keyword.instruction.fasmg"
+            }
+          }
+        }
+      ]
+    },
+    "labels": {
+      "patterns": [
+        {
+          "name": "meta.definition.area-label.fasmg",
+          "match": "^\\s*([.?A-Za-z_$][A-Za-z0-9_.#$?]*)(::)",
+          "captures": {
+            "1": {
+              "name": "entity.name.label.fasmg"
+            },
+            "2": {
+              "name": "punctuation.separator.label.fasmg"
+            }
+          }
+        },
+        {
+          "name": "meta.definition.label.fasmg",
+          "match": "^\\s*([.?A-Za-z_$][A-Za-z0-9_.#$?]*)(:)",
+          "captures": {
+            "1": {
+              "name": "entity.name.label.fasmg"
+            },
+            "2": {
+              "name": "punctuation.separator.label.fasmg"
+            }
+          }
+        },
+        {
+          "name": "meta.definition.label.fasmg",
+          "match": "^\\s*((?i:label))\\s+(\\??[.?A-Za-z_$][A-Za-z0-9_.#$?]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.declaration.label.fasmg"
+            },
+            "2": {
+              "name": "entity.name.label.fasmg"
+            }
+          }
+        }
+      ]
+    },
+    "definitions": {
+      "patterns": [
+        {
+          "name": "meta.definition.constant.define.fasmg",
+          "match": "^\\s*((?i:define))\\s+([.?A-Za-z_$][A-Za-z0-9_.#$?]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.declaration.constant.fasmg"
+            },
+            "2": {
+              "name": "variable.other.constant.fasmg"
+            }
+          }
+        },
+        {
+          "name": "meta.definition.constant.assignment.fasmg",
+          "match": "^\\s*([.?A-Za-z_$][A-Za-z0-9_.#$?]*)\\s*((?::=)|(?:=:)|=)",
+          "captures": {
+            "1": {
+              "name": "variable.other.constant.fasmg"
+            },
+            "2": {
+              "name": "keyword.operator.assignment.fasmg"
+            }
+          }
+        },
+        {
+          "name": "meta.definition.constant.equ.fasmg",
+          "match": "^\\s*([.?A-Za-z_$][A-Za-z0-9_.#$?]*)\\s+((?i:equ|reequ))\\b",
+          "captures": {
+            "1": {
+              "name": "variable.other.constant.fasmg"
+            },
+            "2": {
+              "name": "keyword.declaration.constant.fasmg"
+            }
+          }
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.fasmg",
+          "match": "\\b(?i:mod|shl|shr|xor|and|or|not|bsf|bsr|bswap|bappend|string|lengthof|element|scale|metadata|elementof|scaleof|metadataof|elementsof|float|trunc|relativeto|eqtype|eq|defined|definite|used|sizeof)\\b"
+        }
+      ]
+    },
+    "directives": {
+      "patterns": [
+        {
+          "name": "storage.modifier.local.fasmg",
+          "match": "\\b(?i:local)\\b"
+        },
+        {
+          "name": "meta.preprocessor.include.fasmg",
+          "match": "^\\s*((?i:include))\\b",
+          "captures": {
+            "1": {
+              "name": "keyword.control.include.fasmg"
+            }
+          }
+        },
+        {
+          "name": "keyword.control.fasmg",
+          "match": "\\b(?i:namespace|end\\s+namespace|macro|end\\s+macro|struc|end\\s+struc|calminstruction|end\\s+calminstruction|if|else|else\\s+if|end\\s+if|repeat|rept|end\\s+repeat|while|end\\s+while|match|rawmatch|rmatch|end\\s+match|else\\s+match|iterate|irp|irpv|end\\s+iterate|postpone|end\\s+postpone|indx|outscope|break|assert|org|section|virtual|end\\s+virtual|restartout|eval|display|err|format|retaincomments|removecomments|isolatelines|combinelines|load|store)\\b"
+        },
+        {
+          "name": "storage.type.fasmg",
+          "match": "\\b(?i:label|element|equ|reequ|define|redefine|restore|purge|mvmacro|mvstruc)\\b"
+        },
+        {
+          "name": "keyword.operator.fasmg",
+          "match": "\\b(?i:from|at|as|dup)\\b"
+        },
+        {
+          "name": "support.constant.format.fasmg",
+          "match": "\\b(?i:binary|executable)\\b"
+        }
+      ]
+    },
+    "calm-block": {
+      "name": "meta.block.calm.fasmg",
+      "begin": "^\\s*((?i:calminstruction))\\b",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.calm.fasmg"
+        }
+      },
+      "end": "^\\s*((?i:end))\\s+((?i:calminstruction))\\b",
+      "endCaptures": {
+        "1": {
+          "name": "keyword.control.calm.fasmg"
+        },
+        "2": {
+          "name": "keyword.control.calm.fasmg"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#strings"
+        },
+        {
+          "include": "#builtins"
+        },
+        {
+          "include": "#numbers"
+        },
+        {
+          "include": "#operators"
+        },
+        {
+          "include": "#calm-commands"
+        },
+        {
+          "include": "#labels"
+        }
+      ]
+    },
+    "calm-commands": {
+      "patterns": [
+        {
+          "name": "keyword.control.calm.fasmg",
+          "match": "^\\s*(?i:(assemble|match|jyes|jno|jump|exit|local|arrange|compute|check|publish|transform|stringify|take|taketext|call|display|err|emit|load|store))\\b"
+        },
+        {
+          "name": "support.type.calm.modifier.fasmg",
+          "match": "\\b(?i:(name|expression|number|quoted|equ|macro|struc|priorequ|priormacro|priorstruc|area))\\b"
+        }
+      ]
+    }
+  }
+}
