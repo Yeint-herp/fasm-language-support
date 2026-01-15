@@ -120,7 +120,7 @@
         },
         {
           "name": "meta.instruction.fasmg",
-          "match": "^\\s*(?:(?:[.?A-Za-z_$][A-Za-z0-9_.#$?]*)(?::)\\s*)?(?i:(db|dw|dd|dq|dt|dp|ddq|dqq|ddqq|rb|rw|rd|rq|rt|rp|rdq|rqq|rdqq|syscall|mov|movzx|add|neg|sub|mul|div|jmp|je|jz|jne|jnz|jg|jl|jb|ja|jae|jbe|jna|jnb|js|jns|jnp|jp|jc|jnc|pushf|popf|pusha|popa|pushfd|popfd|pushaq|popaq|pushfq|popfq|scasw|push|pop|call|ret|retf|retn|iret|cmp|and|or|xor|not|shl|shr|rol|rol|das|sbb|inc|dec|lea|cpuid|xgetbv|test|stosb|stosw|stosd|lodsb|lodsw|lodsd|scasb|scasw|scasd|xchg|int|rep|repe|repz|repnz|repne|cli|sti|cld|std))\\b",
+          "match": "^\\s*(?:(?:[.?A-Za-z_$][A-Za-z0-9_.#$?]*)(?::)\\s*)?(?i:(db|dw|dd|dq|dt|dp|ddq|dqq|ddqq|rb|rw|rd|rq|rt|rp|rdq|rqq|rdqq|syscall|mov|movzx|add|neg|sub|mul|imul|idiv|div|jmp|je|jz|jne|jnz|jg|jl|jb|ja|jae|jbe|jna|jnb|js|jns|jnp|jp|jc|jnc|loop|pushf|popf|pusha|popa|pushad|popad|pushfd|popfd|pushaq|popaq|pushfq|popfq|scasw|push|pop|call|ret|retf|retn|iret|cmp|and|or|xor|not|shl|shr|rol|rol|das|sbb|inc|dec|in|out|lea|cpuid|xgetbv|test|stosb|stosw|stosd|lodsb|lodsw|lodsd|scasb|scasw|scasd|xchg|int|rep|repe|repz|repnz|repne|cli|clc|stc|sti|cld|std))\\b",
           "captures": {
             "1": {
               "name": "keyword.instruction.fasmg"

@@ -1,70 +1,43 @@
 import * as vscode from 'vscode';
+import {
+    identifierRegexGlobal,
+} from './symbols';
+import {
+    FasmgDefinitionProvider,
+    FasmgSymbolIndex,
+} from './goto';
 
 const tokenTypes: string[] = ['label', 'constant'];
 const tokenModifiers: string[] = [];
 
-const legend = new vscode.SemanticTokensLegend(
-    tokenTypes,
-    tokenModifiers
-);
+const legend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
 
-interface SymbolTable {
-    labels: Map<string, vscode.Position[]>;
-    constants: Map<string, vscode.Position[]>;
-}
+class FasmgSemanticTokensProvider
+    implements vscode.DocumentSemanticTokensProvider {
 
-const identifierRegexGlobal = /[.?A-Za-z_$][A-Za-z0-9_.#$?]*/g;
-const identifierRegex = /[.?A-Za-z_$][A-Za-z0-9_.#$?]*/;
+    constructor(private readonly index: FasmgSymbolIndex) { }
 
-const labelDefRegex = /^\s*([.?A-Za-z_$][A-Za-z0-9_.#$?]*)(?:::|:)/i;
-const equRegex = /^\s*([.?A-Za-z_$][A-Za-z0-9_.#$?]*)\s+(equ|reequ)\b/i;
-const defineRegex = /^\s*define\s+([.?A-Za-z_$][A-Za-z0-9_.#$?]*)/i;
-const assignRegex = /^\s*([.?A-Za-z_$][A-Za-z0-9_.#$?]*)\s*(?::=|=:|=)/;
-
-function buildSymbolTable(document: vscode.TextDocument): SymbolTable {
-    const labels = new Map<string, vscode.Position[]>();
-    const constants = new Map<string, vscode.Position[]>();
-
-    for (let line = 0; line < document.lineCount; line++) {
-        const fullText = document.lineAt(line).text;
-        const text = fullText.split(';', 1)[0];
-
-        let m: RegExpExecArray | null;
-
-        if ((m = labelDefRegex.exec(text))) {
-            const name = m[1];
-            const norm = name.toLowerCase();
-            const col = text.indexOf(name);
-            const pos = new vscode.Position(line, col);
-            if (!labels.has(norm)) labels.set(norm, []);
-            labels.get(norm)!.push(pos);
-            continue;
-        }
-
-        if ((m = defineRegex.exec(text)) ||
-            (m = equRegex.exec(text)) ||
-            (m = assignRegex.exec(text))) {
-            const name = m[1];
-            const norm = name.toLowerCase();
-            const col = text.indexOf(name);
-            const pos = new vscode.Position(line, col);
-            if (!constants.has(norm)) constants.set(norm, []);
-            constants.get(norm)!.push(pos);
-        }
-    }
-
-    return { labels, constants };
-}
-
-class FasmgSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
     async provideDocumentSemanticTokens(
         document: vscode.TextDocument,
-        _token: vscode.CancellationToken
+        token: vscode.CancellationToken
     ): Promise<vscode.SemanticTokens> {
         const builder = new vscode.SemanticTokensBuilder(legend);
-        const { labels, constants } = buildSymbolTable(document);
+
+        await this.index.ensureInitialized();
+        if (token.isCancellationRequested) {
+            return builder.build();
+        }
+
+        await this.index.indexDocument(document);
+        if (token.isCancellationRequested) {
+            return builder.build();
+        }
+
+        const kindCache = new Map<string, 'label' | 'value' | null>();
 
         for (let line = 0; line < document.lineCount; line++) {
+            if (token.isCancellationRequested) break;
+
             const fullText = document.lineAt(line).text;
             const text = fullText.split(';', 1)[0];
 
@@ -73,16 +46,23 @@ class FasmgSemanticTokensProvider implements vscode.DocumentSemanticTokensProvid
 
             while ((m = identifierRegexGlobal.exec(text))) {
                 const name = m[0];
-                const norm = name.toLowerCase();
+
+                let kind = kindCache.get(name);
+                if (kind === undefined) {
+                    kind = this.index.lookupSymbolKind(name);
+                    kindCache.set(name, kind);
+                }
+
+                if (!kind) continue;
 
                 let typeIndex = -1;
-                if (labels.has(norm))
+                if (kind === 'label') {
                     typeIndex = tokenTypes.indexOf('label');
-                else if (constants.has(norm))
+                } else if (kind === 'value') {
                     typeIndex = tokenTypes.indexOf('constant');
+                }
 
-                if (typeIndex === -1)
-                    continue;
+                if (typeIndex === -1) continue;
 
                 const startChar = m.index;
                 builder.push(line, startChar, name.length, typeIndex, 0);
@@ -93,41 +73,44 @@ class FasmgSemanticTokensProvider implements vscode.DocumentSemanticTokensProvid
     }
 }
 
-class FasmgDefinitionProvider implements vscode.DefinitionProvider {
-    provideDefinition(
-        document: vscode.TextDocument,
-        position: vscode.Position,
-        _token: vscode.CancellationToken
-    ): vscode.ProviderResult<vscode.Definition> {
-        const range = document.getWordRangeAtPosition(position, identifierRegex);
-        if (!range)
-            return null;
-
-        const name = document.getText(range);
-        const norm = name.toLowerCase();
-        const { labels, constants } = buildSymbolTable(document);
-
-        const defPos = (labels.get(norm) && labels.get(norm)![0]) || (constants.get(norm) && constants.get(norm)![0]);
-
-        if (!defPos)
-            return null;
-
-        return new vscode.Location(document.uri, defPos);
-    }
-}
-
 export function activate(context: vscode.ExtensionContext) {
+    const index = new FasmgSymbolIndex();
+
+    const selector: vscode.DocumentSelector = [
+        { language: 'fasmg' },
+        { scheme: 'file', pattern: '**/*.asm' },
+        { scheme: 'file', pattern: '**/*.inc' },
+        { scheme: 'untitled', language: 'fasmg' },
+    ];
+
+    context.subscriptions.push(
+        vscode.workspace.onDidOpenTextDocument((doc) => {
+            void index.indexDocument(doc);
+        }),
+        vscode.workspace.onDidChangeTextDocument((e) => {
+            void index.indexDocument(e.document);
+        }),
+        vscode.workspace.onDidSaveTextDocument((doc) => {
+            void index.indexDocument(doc);
+        }),
+        vscode.workspace.onDidCloseTextDocument((doc) => {
+            index.removeDocument(doc.uri);
+        })
+    );
+
     context.subscriptions.push(
         vscode.languages.registerDocumentSemanticTokensProvider(
-            { language: 'fasmg' },
-            new FasmgSemanticTokensProvider(),
+            selector,
+            new FasmgSemanticTokensProvider(index),
             legend
         ),
         vscode.languages.registerDefinitionProvider(
-            { language: 'fasmg' },
-            new FasmgDefinitionProvider()
+            selector,
+            new FasmgDefinitionProvider(index)
         )
     );
+
+    void index.ensureInitialized();
 }
 
 export function deactivate() { }
