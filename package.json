@@ -2,7 +2,7 @@
   "name": "fasmg-language-support",
   "displayName": "Fasmg language support",
   "description": "Syntax highlithing support for fasmg & fasm2.",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "engines": {
     "vscode": "^1.106.1"
   },

@@ -35,6 +35,9 @@
     },
     {
       "include": "#directives"
+    },
+    {
+      "include": "#modifiers"
     }
   ],
   "repository": {
@@ -120,9 +123,12 @@
         },
         {
           "name": "meta.instruction.fasmg",
-          "match": "^\\s*(?:(?:[.?A-Za-z_$][A-Za-z0-9_.#$?]*)(?::)\\s*)?(?i:(db|dw|dd|dq|dt|dp|ddq|dqq|ddqq|rb|rw|rd|rq|rt|rp|rdq|rqq|rdqq|syscall|mov|movzx|add|neg|sub|mul|div|jmp|je|jz|jne|jnz|jg|jl|jb|ja|jae|jbe|jna|jnb|js|jns|jnp|jp|jc|jnc|pushf|popf|pusha|popa|pushfd|popfd|pushaq|popaq|pushfq|popfq|scasw|push|pop|call|ret|retf|retn|iret|cmp|and|or|xor|not|shl|shr|rol|rol|das|sbb|inc|dec|lea|cpuid|xgetbv|test|stosb|stosw|stosd|lodsb|lodsw|lodsd|scasb|scasw|scasd|xchg|int|rep|repe|repz|repnz|repne|cli|sti|cld|std))\\b",
+          "match": "^\\s*(?:(?:[.?A-Za-z_$][A-Za-z0-9_.#$?]*)(?::)\\s*)?(?:(?i:(lock|rep|repe|repz|repnz|repne))\\s+)*(?i:(db|dw|dd|dq|dt|dp|ddq|dqq|ddqq|rb|rw|rd|rq|rt|rp|rdq|rqq|rdqq|syscall|sysenter|sysexit|mov|movzx|movsx|movsxd|xchg|lea|add|adc|sub|sbb|inc|dec|neg|cmp|test|mul|imul|div|idiv|and|or|xor|not|shl|sal|shr|sar|rol|ror|rcl|rcr|shld|shrd|jmp|je|jz|jne|jnz|ja|jae|jb|jbe|jc|jnc|jo|jno|js|jns|jp|jnp|jg|jge|jl|jle|jna|jnb|jcxz|jecxz|jrcxz|loop|call|ret|retf|retn|iret|push|pop|pusha|popa|pushad|popad|pushf|popf|pushfd|popfd|pushaq|popaq|pushfq|popfq|nop|pause|cmc|clc|stc|cli|sti|cld|std|lahf|sahf|daa|das|aaa|aas|int|int3|into|hlt|wait|fwait|cpuid|xgetbv|stosb|stosw|stosd|stosq|lodsb|lodsw|lodsd|lodsq|scasb|scasw|scasd|scasq|movsb|movsw|movsd|movsq|cmpsb|cmpsw|cmpsd|cmpsq|ins|insb|insw|insd|outs|outsb|outsw|outsd|in|out|xlat|xlatb|bound|arpl|bsf|bsr|bswap|bt|btc|btr|bts))\\b",
           "captures": {
             "1": {
+              "name": "keyword.instruction.prefix.fasmg"
+            },
+            "2": {
               "name": "keyword.instruction.fasmg"
             }
           }
@@ -166,6 +172,22 @@
               "name": "entity.name.label.fasmg"
             }
           }
+        }
+      ]
+    },
+    "modifiers": {
+      "patterns": [
+        {
+          "name": "storage.modifier.segment-override.fasmg",
+          "match": "\\b(?i:cs|ds|es|fs|gs|ss)(?=:)"
+        },
+        {
+          "name": "storage.modifier.jump-length.fasmg",
+          "match": "\\b(?i:short|near|far|long)\\b"
+        },
+        {
+          "name": "storage.modifier.pointer.fasmg",
+          "match": "\\b(?i:ptr)\\b"
         }
       ]
     },
